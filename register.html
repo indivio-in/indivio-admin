@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register New School - Indivio Admin</title>
+    <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body class="is-loading">
+    <div class="container" style="max-width: 800px;">
+        <header class="main-header">
+            <h1>Register New School</h1>
+            <nav class="main-nav"><a href="dashboard.html" class="btn">← Back to Dashboard</a></nav>
+        </header>
+        <main>
+            <form id="new-school-form" class="form-grid">
+                <div class="form-group"><input type="text" name="schoolName" class="form-input" placeholder=" " required><label class="form-label">School Name</label></div>
+                <div class="form-group"><input type="text" name="city" class="form-input" placeholder=" " required><label class="form-label">City</label></div>
+                <div class="form-group"><input type="text" name="adminName" class="form-input" placeholder=" " required><label class="form-label">Admin Name</label></div>
+                <div class="form-group"><input type="email" name="adminEmail" class="form-input" placeholder=" " required><label class="form-label">Admin Email</label></div>
+                <div class="form-group form-group-full"><label class="static-label">School Logo</label><input type="file" id="school-logo-upload" class="form-input file-input" accept="image/*"></div>
+                <div class="form-group form-group-full"><label class="static-label">Subscription Plan</label><select id="plan-tier-select" class="form-input" required></select></div>
+                <div class="form-group-full"><button type="submit" class="btn btn-primary">Register School</button></div>
+            </form>
+            <div id="registration-status" style="margin-top: 1.5rem;"></div>
+        </main>
+    </div>
+
+   <!-- ================= CORRECTED SCRIPT BLOCK ================= -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+
+<!-- Your Custom Scripts -->
+<script src="firebase-config.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/dashboard.js"></script>
+<!-- ... etc. for the other pages ... -->
+</body>
+</html>
