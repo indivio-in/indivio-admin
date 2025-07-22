@@ -1,3 +1,5 @@
+let currentSchools = [];
+
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('school-grid')) {
         initializeDashboard();
@@ -5,61 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeDashboard() {
-    new LocomotiveScroll({ el: document.querySelector('#main-container'), smooth: true });
-    new Swiper('.swiper', { slidesPerView: 'auto', spaceBetween: 30, pagination: { el: '.swiper-pagination', clickable: true } });
-    new Typed('#admin-greeting', { strings: ['Admin.', 'Creator.', 'Manager.'], typeSpeed: 50, backSpeed: 30, loop: true });
-    
     listenForSchoolUpdates();
-
     const modal = document.getElementById('edit-school-modal');
     modal.querySelector('.close-button').addEventListener('click', () => modal.style.display = 'none');
     document.getElementById('edit-school-form').addEventListener('submit', handleUpdateSchool);
-}
-
-function listenForSchoolUpdates() {
-    const grid = document.getElementById("school-grid");
-    
-    db.collection("schools").orderBy("createdAt", "desc").onSnapshot(snapshot => {
-        grid.innerHTML = '';
-        if (snapshot.empty) {
-            grid.innerHTML = `<p style="text-align: center; grid-column: 1/-1;">No schools registered yet.</p>`;
-            updateStats([]);
-            return;
-        }
-        
-        const schoolsData = [];
-        snapshot.forEach(doc => {
-            const school = { id: doc.id, ...doc.data() };
-            schoolsData.push(school);
-
-            const card = document.createElement('div');
-            card.className = 'school-card';
-            card.innerHTML = `
-                <div class="card-header">
-                    <img src="${school.logoUrl || 'https://via.placeholder.com/40x40.png?text=L'}" alt="Logo" class="school-logo">
-                    <div class="school-info">
-                        <h3>${school.name}</h3>
-                        <p>${school.schoolId}</p>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <p><strong>Plan:</strong> <span class="plan-badge">${school.plan.name || 'N/A'}</span></p>
-                    <p><strong>Limits:</strong> ${school.plan.limits.students} S / ${school.plan.limits.teachers} T</p>
-                    <p><strong>Status:</strong> <span class="status-badge status-${school.status}">${school.status}</span></p>
-                </div>
-                <div class="card-footer">
-                    <button class="btn edit-btn">Edit</button>
-                    <button class="btn btn-danger delete-btn">Delete</button>
-                </div>
-            `;
-            card.querySelector('.edit-btn').addEventListener('click', () => openEditModal(school));
-            card.querySelector('.delete-btn').addEventListener('click', () => deleteSchool(school.id, school.name));
-            grid.appendChild(card);
-        });
-
-        updateStats(schoolsData);
-
-    }, error => console.error("Real-time listener error: ", error));
 }
 
 async function openEditModal(school) {
@@ -109,15 +60,38 @@ async function handleUpdateSchool(e) {
     document.getElementById('edit-school-modal').style.display = 'none';
 }
 
-function updateStats(schools) {
-    document.getElementById('total-schools').textContent = schools.length;
-    document.getElementById('normal-schools').textContent = schools.filter(s => s.plan.name === 'Normal').length;
-    document.getElementById('pro-schools').textContent = schools.filter(s => s.plan.name === 'Pro').length;
-    document.getElementById('ultra-schools').textContent = schools.filter(s => s.plan.name === 'Ultra').length;
-}
-
-async function deleteSchool(schoolId, schoolName) {
-    if (confirm(`PERMANENTLY DELETE "${schoolName}"? This is irreversible.`)) {
-        await db.collection('schools').doc(schoolId).delete();
-    }
+function listenForSchoolUpdates() {
+    const grid = document.getElementById("school-grid");
+    grid.innerHTML = '<div class="loader"></div>';
+    db.collection("schools").orderBy("createdAt", "desc").onSnapshot(snapshot => {
+        grid.innerHTML = '';
+        if (snapshot.empty) {
+            grid.innerHTML = `<div style="text-align:center;padding:2rem;"><i class='fas fa-school-slash' style='font-size:2rem;color:#aaa;'></i><p>No schools registered yet.<br><small>Use the button above to add your first school!</small></p></div>`;
+            return;
+        }
+        snapshot.forEach(doc => {
+            const school = { id: doc.id, ...doc.data() };
+            const card = document.createElement('div');
+            card.className = 'school-card';
+            card.innerHTML = `
+                <div class="card-header">
+                    <img src="${school.logoUrl || 'https://via.placeholder.com/40x40.png?text=L'}" alt="Logo" class="school-logo">
+                    <div class="school-info">
+                        <h3>${school.name}</h3>
+                        <p>${school.schoolId}</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p><strong>Plan:</strong> <span class="plan-badge">${school.plan.name || 'N/A'}</span></p>
+                    <p><strong>Limits:</strong> ${school.plan.limits.students} S / ${school.plan.limits.teachers} T</p>
+                    <p><strong>Status:</strong> <span class="status-badge status-${school.status}">${school.status}</span></p>
+                </div>
+                <div class="card-footer">
+                    <button class="btn edit-btn">Edit</button>
+                </div>
+            `;
+            card.querySelector('.edit-btn').addEventListener('click', () => openEditModal(school));
+            grid.appendChild(card);
+        });
+    });
 }
